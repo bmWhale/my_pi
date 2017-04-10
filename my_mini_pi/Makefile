@@ -1,6 +1,11 @@
 UNAME := $(shell uname -m)
 ToolPath:="/tools"
 
+
+
+defaults:
+	$(info "no defaults target")
+
 updatePackages:
 	sudo apt-get update
 	sudo apt-get install g++ make gawk -y
@@ -23,4 +28,16 @@ cloneSRC:
 	git clone --depth=1 https://github.com/raspberrypi/linux
 	git clone git://git.denx.de/u-boot.git
 	git clone https://github.com/raspberrypi/firmware.git
+
+mkbusy:
+	cp configs/.config_busybox_pi2 busybox/.config
+	expoARCH=arm && export CROSS_COMPILE=arm-linux-  && echo ${ARCH}
+#cd busybox && $(MAKE) && make install
+
+
+mkkernel:
+
+mkuboot:
+
+mkall:
 
