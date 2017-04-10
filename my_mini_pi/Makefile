@@ -2,7 +2,6 @@ UNAME := $(shell uname -m)
 ToolPath:="/tools"
 
 
-
 defaults:
 	$(info "no defaults target")
 
@@ -13,6 +12,7 @@ updatePackages:
 	sudo apt-get install wget python unzip bc -y
 	sudo apt-get install device-tree-compiler -y
 	sudo apt-get install gcc-arm-linux-gnueabihf -y
+	sudo apt-get install subversion -y
 	sudo git clone https://github.com/raspberrypi/tools /tools
 
 env: updatePackages
@@ -23,11 +23,11 @@ else
 endif
 	sudo -s source ~/.bashrc
 	
-cloneSRC:
+clonesrc:
 	git clone git://git.busybox.net/busybox
 	git clone --depth=1 https://github.com/raspberrypi/linux
 	git clone git://git.denx.de/u-boot.git
-	git clone https://github.com/raspberrypi/firmware.git
+	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
 
 mkbusy:
 	cp configs/.config_busybox_pi2 busybox/.config
@@ -36,11 +36,18 @@ mkbusy:
 	cp configs/post_busybox.sh busybox
 	cd busybox && sudo ./post_busybox.sh
 
-test:
-
 mkkernel:
+	$(MAKE) -C linux ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- bcm2709_defconfig
+	$(MAKE) -C linux -j 8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage modules dtbs
 
 mkuboot:
+	$(MAKE) -C u-boot ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- rpi_2_defconfig
+	$(MAKE) -C u-boot -j 8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- all
 
-mkall:
+distclean:
+	sudo rm -rf linux u-boot busybox firmware
 
+
+mkall: clonesrc mkbusy mkkernel mkuboot
+
+	
