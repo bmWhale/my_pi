@@ -5,6 +5,7 @@ ToolPath:="/tools"
 defaults:
 	$(info "no defaults target")
 
+
 updatePackages:
 	sudo apt-get update
 	sudo apt-get install g++ make gawk -y
@@ -29,6 +30,27 @@ clonesrc:
 	git clone git://git.denx.de/u-boot.git
 	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
 
+mkoutput:
+	$(info create output folder)
+	mkdir -p output/boot output/rootfs output/boot/overlays
+	
+	$(info copy busybox)
+	sudo cp -rf busybox/_install/* output/boot/
+	
+	$(info copy u-boot)
+	sudo cp u-boot/u-boot.bin output/boot/
+	
+	$(info copy firmware)
+	sudo cp -rf firmware/* output/boot/
+	
+	$(info copy kernel)
+	sudo $(MAKE) -C linux ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=output/rootfs modules_install
+	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage output/boot/kernel7.img 
+	sudo cp -rf linux/arch/arm/boot/dts/*.dtb output/boot/
+	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* output/boot/overlays/
+	sudo cp linux/arch/arm/boot/dts/overlays/README output/boot/overlays/
+	
+	$(info deploy done........)
 mkbusy:
 	cp configs/.config_busybox_pi2 busybox/.config
 	$(MAKE) -C busybox ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
@@ -45,7 +67,7 @@ mkuboot:
 	$(MAKE) -C u-boot -j 8 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- all
 
 distclean:
-	sudo rm -rf linux u-boot busybox firmware
+	sudo rm -rf linux u-boot busybox firmware output
 
 
 mkall: clonesrc mkbusy mkkernel mkuboot
