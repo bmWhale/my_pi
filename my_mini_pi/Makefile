@@ -31,9 +31,12 @@ cloneSRC:
 
 mkbusy:
 	cp configs/.config_busybox_pi2 busybox/.config
-	expoARCH=arm && export CROSS_COMPILE=arm-linux-  && echo ${ARCH}
-#cd busybox && $(MAKE) && make install
+	$(MAKE) -C busybox ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+	$(MAKE) -C busybox install
+	cp configs/post_busybox.sh busybox
+	cd busybox && sudo ./post_busybox.sh
 
+test:
 
 mkkernel:
 
