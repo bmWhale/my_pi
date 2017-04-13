@@ -27,7 +27,7 @@ touch sysconfig/HOSTNAME
 #add inittab content
 echo " 
 ::sysinit:/etc/init.d/rcS
-s3c2410_serial0::askfirst:-/bin/sh
+::askfirst:-/bin/sh
 ::ctrlaltdel:-/sbin/reboot
 ::shutdown:/bin/umount -a -r
 ::restart:/sbin/init" > inittab
