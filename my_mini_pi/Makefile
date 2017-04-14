@@ -1,13 +1,14 @@
 UNAME := $(shell uname -m)
-ToolPath := "/tools"
-boot_p := "/media/hugh/boot/"
-rtfs_p := "/media/hugh/rtfs"
-overlays_p := "$(boot_p)/overlays/"
+TOOLPATH := "/tools"
+BOOT_P := "/media/hugh/boot/"
+RTFS_P := "/media/hugh/rtfs"
+OVERLAYS_P := "$(BOOT_P)/overlays/"
 ARCH := "arm"
 TARGET := "arm-linux-gnueabihf"
+GLIBC_V="2.25"
 
 defaults:
-	$(info "no defaults target")
+		$(info "no defaults target")
 
 
 updatePackages:
@@ -22,9 +23,9 @@ updatePackages:
 
 env: updatePackages
 ifeq ($(UNAME),x86_64)
-	$(shell echo export PATH=$(PATH):$(ToolPath)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin >> ~/.bashrc)
+	$(shell echo export PATH=$(PATH):$(TOOLPATH)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin >> ~/.bashrc)
 else
-	$(shell echo export PATH=$(PATH):$(ToolPath)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin >> ~/.bashrc)
+	$(shell echo export PATH=$(PATH):$(TOOLPATH)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin >> ~/.bashrc)
 endif
 	sudo -s source ~/.bashrc
 	
@@ -34,77 +35,49 @@ clonesrc:
 	git clone git://git.denx.de/u-boot.git
 	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
 	mkdir glibc
-	wget http://ftp.gnu.org/gnu/libc/glibc-2.25.tar.xz -P glibc
+	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
 		
-installsd:
-	
-	
+install:
 	$(info remove boot/*)
-	sudo rm -rf $(boot_p)/*
+	sudo rm -rf $(BOOT_P)/*
 	
 	$(info remove rtfs/*)
-	sudo rm -rf $(rtfs_p)/*
+	sudo rm -rf $(RTFS_P)/*
 	
 	$(info create output folder)
-	mkdir -p  $(overlays_p)
+	mkdir -p  $(OVERLAYS_P)
 	
 	$(info copy busybox)
-	sudo cp -rf busybox/_install/* $(rtfs_p)
+	sudo cp -rf busybox/_install/* $(RTFS_P)
 	
 	$(info copy u-boot)
-	sudo cp u-boot/u-boot.bin $(boot_p)
+	sudo cp u-boot/u-boot.bin $(BOOT_P)
 	
 	$(info copy firmware)
-	sudo cp -rf firmware/* $(boot_p)
+	sudo cp -rf firmware/* $(BOOT_P)
 		
 	$(info install glibc)
-	cd glibc/glibc-build && sudo make install install_root=$(rtfs_p)
+	cd glibc/glibc-build && sudo make install install_root=$(RTFS_P)
 
 	$(info copy kernel)
-	sudo $(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(rtfs_p) modules_install
-	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage $(boot_p)/kernel7.img 
-	sudo cp -rf linux/arch/arm/boot/dts/*.dtb $(boot_p)
-	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(overlays_p)
-	sudo cp linux/arch/arm/boot/dts/overlays/README $(overlays_p)
+	sudo $(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(RTFS_P) modules_install
+	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage $(BOOT_P)/kernel7.img 
+	sudo cp -rf linux/arch/arm/boot/dts/*.dtb $(BOOT_P)
+	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(OVERLAYS_P)
+	sudo cp linux/arch/arm/boot/dts/overlays/README $(OVERLAYS_P)
 
 	$(info copy cmdline.txt and config.txt)
-	sudo cp configs/cmdline.txt configs/config.txt $(boot_p)
+	sudo cp configs/cmdline.txt configs/config.txt $(BOOT_P)
 
 	$(info deploy done........)
 
 mkglibc:
-	cd glibc && tar -xJf glibc-2.25.tar.xz
+	cd glibc && tar -xJf glibc-$(GLIBC_V).tar.xz
 	mkdir glibc/glibc-build
-	cd glibc/glibc-build && ../glibc-2.25/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
-
-mkoutput:
-	$(info create output folder)
-	mkdir -p output/boot output/rootfs output/boot/overlays
-	
-	$(info copy busybox)
-	sudo cp -rf busybox/_install/* output/boot/
-	
-	$(info copy u-boot)
-	sudo cp u-boot/u-boot.bin output/boot/
-	
-	$(info copy firmware)
-	sudo cp -rf firmware/* output/boot/
-	
-	$(info install glibc)
-	cd glibc/glibc-build && make install install_root=output/rootfs
-
-	$(info copy kernel)
-	sudo $(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=output/rootfs modules_install
-	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage output/boot/kernel7.img 
-	sudo cp -rf linux/arch/arm/boot/dts/*.dtb output/boot/
-	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* output/boot/overlays/
-	sudo cp linux/arch/arm/boot/dts/overlays/README output/boot/overlays/
-	
-	$(info deploy done........)
+	cd glibc/glibc-build && ../glibc-$(GLIBC_V)/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
 
 mkbusy:
-	#cp configs/.config_busybox_pi2 busybox/.config
-	$(make) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- defconfig
+	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- defconfig
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)-
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- install
 	cp configs/post_busybox.sh busybox
@@ -121,7 +94,12 @@ mkuboot:
 distclean:
 	sudo rm -rf linux u-boot busybox firmware output glibc
 
-
+clean:
+	sudo $(MAKE) -C busybox  clean
+	sudo $(MAKE) -C u-boot clean
+	sudo $(MAKE) -C linux clean
+	sudo rm -rf glibc/glibc-build/*
+	$(info clean done...)	
 mkall: clonesrc mkbusy mkglibc mkkernel mkuboot
 
 	
