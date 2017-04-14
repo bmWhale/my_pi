@@ -1,6 +1,8 @@
 UNAME := $(shell uname -m)
 ToolPath:="/tools"
-
+boot_p="/mnt/boot/"
+rtfs_p="/mnt/rtfs/"
+overlays_p="$(boot_p)/overlays/"
 
 defaults:
 	$(info "no defaults target")
@@ -29,6 +31,42 @@ clonesrc:
 	git clone --depth=1 https://github.com/raspberrypi/linux
 	git clone git://git.denx.de/u-boot.git
 	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
+	mkdir glibc
+	wget http://ftp.gnu.org/gnu/libc/glibc-2.25.tar.xz -P glibc
+		
+installsd:
+	$(info create output folder)
+	mkdir -p output/boot output/rootfs output/boot/overlays
+	
+	$(info copy busybox)
+	sudo cp -rf busybox/_install/* $(rtfs_p)
+	
+	$(info copy u-boot)
+	sudo cp u-boot/u-boot.bin $(boot_p)
+	
+	$(info copy firmware)
+	sudo cp -rf firmware/* $(boot_p)
+		
+	$(info install glibc)
+	cd glibc/glibc-build && sudo make install install_root=$(rtfs_p)
+
+	$(info copy kernel)
+	sudo $(MAKE) -C linux ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=$(rtfs_p) modules_install
+	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage $(boot_p)/kernel7.img 
+	sudo cp -rf linux/arch/arm/boot/dts/*.dtb $(boot_p)
+	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(overlays_p)
+	sudo cp linux/arch/arm/boot/dts/overlays/README $(overlays_p)
+
+	$(info copy cmdline.txt and config.txt)
+	sudo cp configs/cmdline.txt configs/config.txt $(boot_p)
+
+	$(info deploy done........)
+
+mkglibc:
+	export TARGET=arm-linux-gnueabihf
+	cd glibc && tar -xJf glibc-2.25.tar.xz
+	mkdir glibc/glibc-build
+	cd glibc/glibc-build && ../glibc-2.25/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
 
 mkoutput:
 	$(info create output folder)
@@ -43,6 +81,9 @@ mkoutput:
 	$(info copy firmware)
 	sudo cp -rf firmware/* output/boot/
 	
+	$(info install glibc)
+	cd glibc/glibc-build && make install install_root=output/rootfs
+
 	$(info copy kernel)
 	sudo $(MAKE) -C linux ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=output/rootfs modules_install
 	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage output/boot/kernel7.img 
