@@ -1,7 +1,7 @@
 UNAME := $(shell uname -m)
 ToolPath := "/tools"
-boot_p := "/mnt/boot/"
-rtfs_p := "/mnt/rtfs/"
+boot_p := "/media/hugh/boot/"
+rtfs_p := "/media/hugh/rtfs"
 overlays_p := "$(boot_p)/overlays/"
 ARCH := "arm"
 TARGET := "arm-linux-gnueabihf"
@@ -37,8 +37,16 @@ clonesrc:
 	wget http://ftp.gnu.org/gnu/libc/glibc-2.25.tar.xz -P glibc
 		
 installsd:
+	
+	
+	$(info remove boot/*)
+	sudo rm -rf $(boot_p)/*
+	
+	$(info remove rtfs/*)
+	sudo rm -rf $(rtfs_p)/*
+	
 	$(info create output folder)
-	mkdir -p output/boot output/rootfs output/boot/overlays
+	mkdir -p  $(overlays_p)
 	
 	$(info copy busybox)
 	sudo cp -rf busybox/_install/* $(rtfs_p)
@@ -95,9 +103,10 @@ mkoutput:
 	$(info deploy done........)
 
 mkbusy:
-	cp configs/.config_busybox_pi2 busybox/.config
+	#cp configs/.config_busybox_pi2 busybox/.config
+	$(make) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- defconfig
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)-
-	$(MAKE) -C busybox install
+	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- install
 	cp configs/post_busybox.sh busybox
 	cd busybox && sudo ./post_busybox.sh
 
