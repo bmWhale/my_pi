@@ -1,15 +1,23 @@
 UNAME := $(shell uname -m)
-TOOLPATH := "/tools"
-BOOT_P := "/media/hugh/boot/"
-RTFS_P := "/media/hugh/rtfs"
-OVERLAYS_P := "$(BOOT_P)/overlays/"
-ARCH := "arm"
-TARGET := "arm-linux-gnueabihf"
-GLIBC_V="2.25"
+TOOLPATH := /tools
+BOOT_P := /mnt/boot
+RTFS_P := /mnt/rtfs
+OVERLAYS_P := $(BOOT_P)/overlays/
+ARCH := arm
+TARGET := arm-linux-gnueabihf
+GLIBC_V := 2.25
+SD := /dev/sdd
 
 defaults:
 		$(info "no defaults target")
 
+mountsd:
+	sudo mount $(SD)1 $(BOOT_P)
+	sudo mount $(SD)2 $(RTFS_P)
+
+umountsd:
+	sudo umount $(SD)1 
+	sudo umount $(SD)2
 
 updatePackages:
 	sudo apt-get update
@@ -61,14 +69,14 @@ install:
 
 	$(info copy kernel)
 	sudo $(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(RTFS_P) modules_install
-	sudo linux/scripts/mkknlimg linux/arch/arm/boot/zImage $(BOOT_P)/kernel7.img 
+	sudo cp linux/arch/arm/boot/zImage $(BOOT_P)
 	sudo cp -rf linux/arch/arm/boot/dts/*.dtb $(BOOT_P)
 	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(OVERLAYS_P)
 	sudo cp linux/arch/arm/boot/dts/overlays/README $(OVERLAYS_P)
 
-	$(info copy cmdline.txt and config.txt)
+	$(info copy cmdline.txt, config.txt and uboot.env)
 	sudo cp configs/cmdline.txt configs/config.txt $(BOOT_P)
-
+	sudo cp configs/uboot.env $(BOOT_P)
 	$(info deploy done........)
 
 mkglibc:
