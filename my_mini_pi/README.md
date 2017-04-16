@@ -16,7 +16,7 @@ Current versions are :  
 - KERNEL_VER := rpi-4.9.y
 - UBOOT_VER := v2017.03-rc3
 
-Some default paths:      
+## Some default paths:      
 Kernel toolchain path:   
 - TOOLPATH
 default is 『/tools』
