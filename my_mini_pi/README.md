@@ -58,6 +58,16 @@ sudo make mountsd
 sudo make umountsd
 ```
 
+## remove all projects
+This target will remove all projects, so be careful!
+```
+sudo make distclean
+```
 
+## clean all projects
+Just clean all objects which during project-build
+```
+sudo make clean
+```
 
 
