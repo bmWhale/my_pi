@@ -33,7 +33,7 @@ SD card:
 - SD <br>
 default is 『/dev/sdd』
 
-## setup  
+## setup enviroment
 This target will install all the development tools and toolchains for this project.
 ```
 sudo make env
