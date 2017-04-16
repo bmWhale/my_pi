@@ -40,8 +40,7 @@ endif
 	sudo -s source ~/.bashrc
 	
 clonesrc:
-	git clone git://git.busybox.net/busybox
-	cd busybox && git checkout remotes/origin/$(BUSY_VER) -b $(BUSY_VER)
+	git clone git://git.busybox.net/busybox -b $(BUSY_VER)
 	git clone --depth=1 https://github.com/raspberrypi/linux -b $(KERNEL_VER)	
 	git clone git://git.denx.de/u-boot.git
 	cd u-boot && git checkout tags/$(UBOOT_VER) -b $(UBOOT_VER)
