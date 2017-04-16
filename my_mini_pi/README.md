@@ -18,22 +18,46 @@ Current versions are :  
 
 ## Some default paths:      
 Kernel toolchain path:   
-- TOOLPATH   
+- TOOLPATH <br>
 default is 『/tools』
 
 Boot section:   
-- BOOT_P   
+- BOOT_P <br>
 default is 『/mnt/boot』
 
 Rootfs section:   
-- RTFS_P   
+- RTFS_P <br>
 default is  『/mnt/rtfs』
 
+SD card:
+- SD <br>
+default is 『/dev/sdd』
+
 ## setup  
-make env
+This target will install all the development tools and toolchains for this project.
+```
+sudo make env
+```
 
 ## download and make all
+This target will clone all projects(busybox, kernel, u-boot, rpi firwarm, glibc) as spicific versions/branches, and build all project as architecture - 『arm』 and ABI - 『arm-linux-gnueabihf』.
+```
 make mkall
+```
 
-## install to SD card  
-make install
+## install to SD card  
+Install all needed conmponents to your SD card.
+```
+sudo make install
+```
+
+## mount and umount SD card
+Just for my convenience in developing this project.
+```
+sudo make mountsd
+sudo make umountsd
+```
+
+
+
+
