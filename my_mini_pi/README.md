@@ -1,4 +1,4 @@
-Create a minimal Linux System for Raspberry pi
+Create a minimal Linux System for Raspberry pi 2
 
 # Usage
 
