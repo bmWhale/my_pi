@@ -1,5 +1,13 @@
 Create a minimal Linux System for Raspberry pi 2
 
+It's easy, just:<br>
+```
+make env # setup all tools
+make mkall # make all projects
+make install # to your SD card
+```
+
+
 # Usage
 
 
