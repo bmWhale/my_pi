@@ -18,15 +18,15 @@ Current versions are :  
 
 ## Some default paths:      
 Kernel toolchain path:   
-- TOOLPATH
+- TOOLPATH   
 default is 『/tools』
 
 Boot section:   
-- BOOT_P
+- BOOT_P   
 default is 『/mnt/boot』
 
 Rootfs section:   
-- RTFS_P
+- RTFS_P   
 default is  『/mnt/rtfs』
 
 ## setup  
