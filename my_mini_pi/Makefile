@@ -1,15 +1,15 @@
 UNAME := $(shell uname -m)
 TOOLPATH := /tools
+SD := /dev/sdd
 BOOT_P := /mnt/boot
 RTFS_P := /mnt/rtfs
 OVERLAYS_P := $(BOOT_P)/overlays/
 ARCH := arm
 TARGET := arm-linux-gnueabihf
 GLIBC_V := 2.25
-SD := /dev/sdd
-BUSY_VER=1_26_stable
-KERNEL_VER=rpi-4.9.y
-UBOOT_VER=v2017.03-rc3
+BUSY_VER := 1_26_stable
+KERNEL_VER := rpi-4.9.y
+UBOOT_VER := v2017.03-rc3
 defaults:
 		$(info "no defaults target")
 
