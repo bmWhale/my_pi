@@ -7,7 +7,9 @@ ARCH := arm
 TARGET := arm-linux-gnueabihf
 GLIBC_V := 2.25
 SD := /dev/sdd
-
+BUSY_VER=1_26_stable
+KERNEL_VER=rpi-4.9.y
+UBOOT_VER=v2017.03-rc3
 defaults:
 		$(info "no defaults target")
 
@@ -39,8 +41,10 @@ endif
 	
 clonesrc:
 	git clone git://git.busybox.net/busybox
-	git clone --depth=1 https://github.com/raspberrypi/linux
+	cd busybox && git checkout remotes/origin/$(BUSY_VER) -b $(BUSY_VER)
+	git clone --depth=1 https://github.com/raspberrypi/linux -b $(KERNEL_VER)	
 	git clone git://git.denx.de/u-boot.git
+	cd u-boot && git checkout tags/$(UBOOT_VER) -b $(UBOOT_VER)
 	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
 	mkdir glibc
 	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
