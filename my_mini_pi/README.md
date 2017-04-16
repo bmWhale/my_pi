@@ -40,7 +40,7 @@ sudo make env
 ```
 
 ## download and make all
-This target will clone all projects(busybox, kernel, u-boot, rpi firwarm, glibc) as spicific versions/branches, and build all project as architecture - 『arm』 and ABI - 『arm-linux-gnueabihf』.
+This target will clone all projects(busybox, kernel, u-boot, rpi firwarm, glibc) as spicific versions/branches, and build all projects as architecture - 『arm』 and ABI - 『arm-linux-gnueabihf』.
 ```
 make mkall
 ```
