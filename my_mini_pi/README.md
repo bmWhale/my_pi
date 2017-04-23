@@ -1,5 +1,13 @@
 Create a minimal Linux System for Raspberry pi 2
 
+It's easy, just:<br>
+```
+make env # setup all tools
+make mkall # make all projects
+make install # to your SD card
+```
+
+
 # Usage
 
 
@@ -58,6 +66,16 @@ sudo make mountsd
 sudo make umountsd
 ```
 
+## remove all projects
+This target will remove all projects, so be careful!
+```
+sudo make distclean
+```
 
+## clean all projects
+Just clean all objects which during project-build
+```
+sudo make clean
+```
 
 
