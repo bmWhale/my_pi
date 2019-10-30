@@ -1,8 +1,8 @@
 UNAME := $(shell uname -m)
 TOOLPATH := /tools
 SD := /dev/sdd
-BOOT_P := /mnt/boot
-RTFS_P := /mnt/rtfs
+BOOT_P := ./boot
+RTFS_P := ./rootfs
 OVERLAYS_P := $(BOOT_P)/overlays/
 ARCH := arm
 TARGET := arm-linux-gnueabihf
@@ -49,37 +49,39 @@ clonesrc:
 	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
 		
 install:
+	mkdir -p $(RTFS_P) 
+	mkdir -p $(BOOT_P)
 	$(info remove boot/*)
-	sudo rm -rf $(BOOT_P)/*
+	rm -rf $(BOOT_P)/*
 	
 	$(info remove rtfs/*)
-	sudo rm -rf $(RTFS_P)/*
+	rm -rf $(RTFS_P)/*
 	
 	$(info create output folder)
 	mkdir -p  $(OVERLAYS_P)
 	
 	$(info copy busybox)
-	sudo cp -rf busybox/_install/* $(RTFS_P)
+	cp -rf busybox/_install/* $(RTFS_P)
 	
 	$(info copy u-boot)
-	sudo cp u-boot/u-boot.bin $(BOOT_P)
+	cp u-boot/u-boot.bin $(BOOT_P)
 	
 	$(info copy firmware)
-	sudo cp -rf firmware/* $(BOOT_P)
+	cp -rf firmware/* $(BOOT_P)
 		
 	$(info install glibc)
-	cd glibc/glibc-build && sudo make install install_root=$(RTFS_P)
+	cd glibc/glibc-build && make install install_root=$(RTFS_P)
 
 	$(info copy kernel)
-	sudo $(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(RTFS_P) modules_install
-	sudo cp linux/arch/arm/boot/zImage $(BOOT_P)
-	sudo cp -rf linux/arch/arm/boot/dts/*.dtb $(BOOT_P)
-	sudo cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(OVERLAYS_P)
-	sudo cp linux/arch/arm/boot/dts/overlays/README $(OVERLAYS_P)
+	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(RTFS_P) modules_install
+	cp linux/arch/arm/boot/zImage $(BOOT_P)
+	cp -rf linux/arch/arm/boot/dts/*.dtb $(BOOT_P)
+	cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(OVERLAYS_P)
+	cp linux/arch/arm/boot/dts/overlays/README $(OVERLAYS_P)
 
 	$(info copy cmdline.txt, config.txt and uboot.env)
-	sudo cp configs/cmdline.txt configs/config.txt $(BOOT_P)
-	sudo cp configs/uboot.env $(BOOT_P)
+	cp configs/cmdline.txt configs/config.txt $(BOOT_P)
+	cp configs/uboot.env $(BOOT_P)
 	$(info deploy done........)
 
 mkglibc:
@@ -92,15 +94,15 @@ mkbusy:
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)-
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- install
 	cp configs/post_busybox.sh busybox
-	cd busybox && sudo ./post_busybox.sh
+	cd busybox && ./post_busybox.sh
 
 mkkernel:
 	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- bcm2709_defconfig
-	$(MAKE) -C linux -j 8 ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- zImage modules dtbs
+	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- zImage modules dtbs
 
 mkuboot:
 	$(MAKE) -C u-boot ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- rpi_2_defconfig
-	$(MAKE) -C u-boot -j 8 ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- all
+	$(MAKE) -C u-boot ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- all
 
 distclean:
 	sudo rm -rf linux u-boot busybox firmware output glibc
