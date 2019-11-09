@@ -1,25 +1,14 @@
 UNAME := $(shell uname -m)
 TOOLPATH := /tools
-SD := /dev/sdd
-BOOT_P := ./boot
-RTFS_P := ./rootfs
-OVERLAYS_P := $(BOOT_P)/overlays/
 ARCH := arm
 TARGET := arm-linux-gnueabihf
 GLIBC_V := 2.25
-BUSY_VER := 1_26_stable
+BUSY_VER := 1_31_stable
 KERNEL_VER := rpi-4.9.y
-UBOOT_VER := v2017.03-rc3
+UBOOT_VER := v2019.10-rc4
+
 defaults:
 		$(info "no defaults target")
-
-mountsd:
-	sudo mount $(SD)1 $(BOOT_P)
-	sudo mount $(SD)2 $(RTFS_P)
-
-umountsd:
-	sudo umount $(SD)1 
-	sudo umount $(SD)2
 
 updatePackages:
 	sudo apt-get update
@@ -38,24 +27,34 @@ else
 	$(shell echo export PATH=$(PATH):$(TOOLPATH)/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin >> ~/.bashrc)
 endif
 	sudo -s source ~/.bashrc
-	
+
 clonesrc:
+ifeq (,$(wildcard ./busybox))
 	git clone git://git.busybox.net/busybox -b $(BUSY_VER)
-	git clone --depth=1 https://github.com/raspberrypi/linux -b $(KERNEL_VER)	
+endif
+ifeq (,$(wildcard ./linux))
+	git clone --depth=1 https://github.com/raspberrypi/linux -b $(KERNEL_VER)
+endif
+ifeq (,$(wildcard ./u-boot))
 	git clone git://git.denx.de/u-boot.git
 	cd u-boot && git checkout tags/$(UBOOT_VER) -b $(UBOOT_VER)
+endif
+ifeq (,$(wildcard ./firmware))
 	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
+endif
+ifeq (,$(wildcard ./glibc))
 	mkdir glibc
 	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
-		
+endif
+
 install:
 	mkdir -p $(RTFS_P) 
 	mkdir -p $(BOOT_P)
 	$(info remove boot/*)
-	rm -rf $(BOOT_P)/*
+	rm -r $(BOOT_P)/*
 	
 	$(info remove rtfs/*)
-	rm -rf $(RTFS_P)/*
+	rm -r $(RTFS_P)/*
 	
 	$(info create output folder)
 	mkdir -p  $(OVERLAYS_P)
@@ -84,35 +83,45 @@ install:
 	cp configs/uboot.env $(BOOT_P)
 	$(info deploy done........)
 
-mkglibc:
+.PHONY:glibc
+glibc:
 	cd glibc && tar -xJf glibc-$(GLIBC_V).tar.xz
 	mkdir glibc/glibc-build
 	cd glibc/glibc-build && ../glibc-$(GLIBC_V)/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
 
-mkbusy:
+.PHONY: busybox
+busybox:
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- defconfig
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)-
 	$(MAKE) -C busybox ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- install
-	cp configs/post_busybox.sh busybox
-	cd busybox && ./post_busybox.sh
 
-mkkernel:
+.PHONY: linux
+linux:
 	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- bcm2709_defconfig
 	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- zImage modules dtbs
 
-mkuboot:
+.PHONY: uboot
+uboot:
 	$(MAKE) -C u-boot ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- rpi_2_defconfig
 	$(MAKE) -C u-boot ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- all
 
+.PHONY: distclean
 distclean:
-	sudo rm -rf linux u-boot busybox firmware output glibc
+	rm -r linux u-boot busybox firmware output glibc
 
+.PHONY: clean
 clean:
-	sudo $(MAKE) -C busybox  clean
-	sudo $(MAKE) -C u-boot clean
-	sudo $(MAKE) -C linux clean
-	sudo rm -rf glibc/glibc-build/*
-	$(info clean done...)	
-mkall: clonesrc mkbusy mkglibc mkkernel mkuboot
+	$(MAKE) -C busybox  clean
+	$(MAKE) -C u-boot clean
+	$(MAKE) -C linux clean
+	rm -r glibc/glibc-build/*
+	$(info clean done...)
 
-	
+.PHONY: all
+all: clonesrc busybox glibc linux uboot	
+
+.PHONY: gen_img
+gen_img:
+	mkdir -p output
+	cp configs/post_rpi3_img.sh output
+	sh output/post_rpi3_img.sh
