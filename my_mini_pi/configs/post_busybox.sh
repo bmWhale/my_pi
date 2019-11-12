@@ -1,9 +1,7 @@
 #!/bin/bash
 
-cd _install 
-
 #create folders
-mkdir bin sbin lib etc dev sys proc tmp var opt mnt usr home root media
+mkdir -p bin sbin lib etc dev sys proc tmp var opt mnt usr home root media
 
 #create folder and files for etc
 cd etc
@@ -59,9 +57,9 @@ cd ..
 
 # add device node
 cd dev
-mknod console c 5 1
-chmod 777 console
-mknod null c 1 3
-chmod 777 null
+sudo mknod console c 5 1
+#chmod 777 console
+sudo mknod null c 1 3
+#chmod 777 null
 cd ..
 
