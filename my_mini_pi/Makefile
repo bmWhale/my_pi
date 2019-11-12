@@ -86,7 +86,7 @@ install:
 .PHONY:glibc
 glibc:
 	cd glibc && tar -xJf glibc-$(GLIBC_V).tar.xz
-	mkdir glibc/glibc-build
+	mkdir -p glibc/glibc-build
 	cd glibc/glibc-build && ../glibc-$(GLIBC_V)/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
 
 .PHONY: busybox
@@ -118,7 +118,7 @@ clean:
 	$(info clean done...)
 
 .PHONY: all
-all: clonesrc busybox glibc linux uboot	
+all: clonesrc busybox glibc linux uboot gen_img
 
 .PHONY: gen_img
 gen_img:
