@@ -4,7 +4,7 @@ ARCH := arm
 TARGET := arm-linux-gnueabihf
 GLIBC_V := 2.25
 BUSY_VER := 1_31_stable
-KERNEL_VER := rpi-4.9.y
+KERNEL_VER := raspberrypi-kernel_1.20190925-1
 UBOOT_VER := v2019.10-rc4
 
 defaults:
@@ -33,7 +33,8 @@ ifeq (,$(wildcard ./busybox))
 	git clone git://git.busybox.net/busybox -b $(BUSY_VER)
 endif
 ifeq (,$(wildcard ./linux))
-	git clone --depth=1 https://github.com/raspberrypi/linux -b $(KERNEL_VER)
+	git clone https://github.com/raspberrypi/linux
+	cd linux && git checkout tags/$(KERNEL_VER) -b $(KERNEL_VER)
 endif
 ifeq (,$(wildcard ./u-boot))
 	git clone git://git.denx.de/u-boot.git
@@ -46,42 +47,6 @@ ifeq (,$(wildcard ./glibc))
 	mkdir glibc
 	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
 endif
-
-install:
-	mkdir -p $(RTFS_P) 
-	mkdir -p $(BOOT_P)
-	$(info remove boot/*)
-	rm -r $(BOOT_P)/*
-	
-	$(info remove rtfs/*)
-	rm -r $(RTFS_P)/*
-	
-	$(info create output folder)
-	mkdir -p  $(OVERLAYS_P)
-	
-	$(info copy busybox)
-	cp -rf busybox/_install/* $(RTFS_P)
-	
-	$(info copy u-boot)
-	cp u-boot/u-boot.bin $(BOOT_P)
-	
-	$(info copy firmware)
-	cp -rf firmware/* $(BOOT_P)
-		
-	$(info install glibc)
-	cd glibc/glibc-build && make install install_root=$(RTFS_P)
-
-	$(info copy kernel)
-	$(MAKE) -C linux ARCH=$(ARCH) CROSS_COMPILE=$(TARGET)- INSTALL_MOD_PATH=$(RTFS_P) modules_install
-	cp linux/arch/arm/boot/zImage $(BOOT_P)
-	cp -rf linux/arch/arm/boot/dts/*.dtb $(BOOT_P)
-	cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* $(OVERLAYS_P)
-	cp linux/arch/arm/boot/dts/overlays/README $(OVERLAYS_P)
-
-	$(info copy cmdline.txt, config.txt and uboot.env)
-	cp configs/cmdline.txt configs/config.txt $(BOOT_P)
-	cp configs/uboot.env $(BOOT_P)
-	$(info deploy done........)
 
 .PHONY:glibc
 glibc:
@@ -107,14 +72,14 @@ uboot:
 
 .PHONY: distclean
 distclean:
-	rm -r linux u-boot busybox firmware output glibc
+	rm -fr linux busybox firmware output glibc
 
 .PHONY: clean
 clean:
 	$(MAKE) -C busybox  clean
 	$(MAKE) -C u-boot clean
 	$(MAKE) -C linux clean
-	rm -r glibc/glibc-build/*
+	rm -fr glibc/glibc-build/*
 	$(info clean done...)
 
 .PHONY: all
@@ -122,6 +87,7 @@ all: clonesrc busybox glibc linux uboot gen_img
 
 .PHONY: gen_img
 gen_img:
+	rm -fr output
 	mkdir -p output
 	cp configs/post_rpi3_img.sh output
 	sh output/post_rpi3_img.sh

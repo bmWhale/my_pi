@@ -6,7 +6,7 @@ rootfsImg="${OUTPUT}/rootfs.img"
 RTFS_P="${OUTPUT}/rootfs"
 BOOT_P="${OUTPUT}/bootfs"
 OVERLAYS_P="${BOOT_P}/overlays"
-fwImg="${OUTPUT}/rpi-3-ext4-sysupgrade.img.gz"
+fwImg="${OUTPUT}/rpi-3-ext4-sysupgrade.img"
 ARCH=arm
 TARGET=arm-linux-gnueabihf
 
@@ -19,10 +19,6 @@ umount_img()
 	sudo /bin/umount ${BOOT_P}
 	echo "umount ${RTFS_P}"
 	sudo /bin/umount ${RTFS_P}
-	#rm $bootfsImg 
-	#rm $rootfsImg
-	#rm -r ${RTFS_P}
-	#rm -r ${BOOT_P}
 }
 
 mount_img()
@@ -30,7 +26,7 @@ mount_img()
     mkdir -p ${RTFS_P} 
     mkdir -p ${BOOT_P}
     mkdir -p  ${OVERLAYS_P}
-	mkfs.vfat -C $bootfsImg 81920
+	mkfs.vfat -C $bootfsImg 61440
 	dd if=/dev/zero of=$rootfsImg bs=262144 count=1024;
 	mkfs.ext4 -L my_os -E root_owner=$uid:$gid $rootfsImg
 
@@ -38,21 +34,21 @@ mount_img()
 	sudo /bin/mount -t vfat -o loop -o user,rw,auto,umask=0000,uid=$uid,gid=$gid,iocharset=utf8 ${bootfsImg} ${BOOT_P}
 	echo "sudo /bin/mount -t ext4 -o loop ${rootfsImg} ${RTFS_P}"
 	sudo /bin/mount -t ext4 -o loop ${rootfsImg} ${RTFS_P}
-	~/bin/ptgen -o ${fwImg} -h 4 -s 63 -l 4096 -t c -p 40M -t 83 -p 512M
+	~/bin/ptgen -o ${fwImg} -h 4 -s 63 -l 4096 -t c -p 60M -t 83 -p 512M
 }
 
 dd_img()
 {
 	BOOTOFFSET="$(( 4194304/ 512))"
-	BOOTSIZE="$(( 41943040/ 512))"
-	ROOTFSOFFSET="$((46137344/ 512))"
+	BOOTSIZE="$(( 62914560/ 512))"
+	ROOTFSOFFSET="$((67108864/ 512))"
 	ROOTFSSIZE="$((268435456/ 512))"
 
 	echo "dd bs=512 if=$bootfsImg of=${fwImg} seek=$BOOTOFFSET conv=notrunc"
 	dd bs=512 if=$bootfsImg of=${fwImg} seek=$BOOTOFFSET conv=notrunc
 	echo "dd bs=512 if=$rootfsImg of=${fwImg} seek=$ROOTFSOFFSET conv=notrunc"
 	dd bs=512 if=$rootfsImg of=${fwImg} seek=$ROOTFSOFFSET conv=notrunc
-	gzip -f -9n -c $fwImg > ${fwImg}.new
+	gzip -f -9n -c $fwImg > ${fwImg}.gz
 	echo "image done"
 }
 
@@ -70,8 +66,13 @@ install_img()
     cp u-boot/u-boot.bin ${BOOT_P}
     
     echo "copy firmware"
-    cp -rf firmware/* ${BOOT_P}
-        
+    cp firmware/bcm2710-rpi-cm3.dtb ${BOOT_P}
+    cp firmware/bcm2710-rpi-3-b-plus.dtb ${BOOT_P}
+    #cp firmware/bcm2710-rpi-3-b.dtb ${BOOT_P}
+    cp firmware/bootcode.bin ${BOOT_P}
+    cp firmware/fixup.dat ${BOOT_P}
+    cp firmware/start.elf ${BOOT_P}
+
     echo "install glibc"
     cd glibc/glibc-build && make install install_root=${RTFS_P}
 	cd ${TOP}
@@ -79,13 +80,14 @@ install_img()
     echo "copy kernel"
     make -C linux ARCH=${ARCH} CROSS_COMPILE=${TARGET}- INSTALL_MOD_PATH=${RTFS_P} modules_install
     cp linux/arch/arm/boot/zImage ${BOOT_P}
-    cp -rf linux/arch/arm/boot/dts/*.dtb ${BOOT_P}
-    cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* ${OVERLAYS_P}
-    cp linux/arch/arm/boot/dts/overlays/README ${OVERLAYS_P}
+    #cp -rf linux/arch/arm/boot/dts/*.dtb ${BOOT_P}
+    #cp -rf linux/arch/arm/boot/dts/overlays/*.dtb* ${OVERLAYS_P}
+    #cp linux/arch/arm/boot/dts/overlays/README ${OVERLAYS_P}
 
     echo "copy cmdline.txt, config.txt and uboot.env"
     cp configs/cmdline.txt configs/config.txt ${BOOT_P}
     cp configs/uboot.env ${BOOT_P}
+    cp configs/bcm2710-rpi-3-b-bt-miniuart.dtb ${BOOT_P}/bcm2710-rpi-3-b.dtb
     echo "deploy done........"
 }
 
