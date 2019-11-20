@@ -26,7 +26,7 @@ mount_img()
     mkdir -p ${RTFS_P} 
     mkdir -p ${BOOT_P}
     mkdir -p  ${OVERLAYS_P}
-	mkfs.vfat -C $bootfsImg 61440
+	mkfs.vfat -C $bootfsImg 40960
 	dd if=/dev/zero of=$rootfsImg bs=262144 count=1024;
 	mkfs.ext4 -L my_os -E root_owner=$uid:$gid $rootfsImg
 
@@ -34,14 +34,15 @@ mount_img()
 	sudo /bin/mount -t vfat -o loop -o user,rw,auto,umask=0000,uid=$uid,gid=$gid,iocharset=utf8 ${bootfsImg} ${BOOT_P}
 	echo "sudo /bin/mount -t ext4 -o loop ${rootfsImg} ${RTFS_P}"
 	sudo /bin/mount -t ext4 -o loop ${rootfsImg} ${RTFS_P}
-	~/bin/ptgen -o ${fwImg} -h 4 -s 63 -l 4096 -t c -p 60M -t 83 -p 512M
+	echo "~/bin/ptgen -o ${fwImg} -h 4 -s 63 -l 4096 -t c -p 40M -t 83 -p 256M"
+	~/bin/ptgen -o ${fwImg} -h 4 -s 63 -l 4096 -t c -p 40M -t 83 -p 256M
 }
 
 dd_img()
 {
-	BOOTOFFSET="$(( 4194304/ 512))"
-	BOOTSIZE="$(( 62914560/ 512))"
-	ROOTFSOFFSET="$((67108864/ 512))"
+	BOOTOFFSET="$(( 4*1024*1024/ 512))"
+	BOOTSIZE="$(( 40*1024*1024/ 512))"
+	ROOTFSOFFSET="$(((4+4+40)*1024*1024/512))"
 	ROOTFSSIZE="$((268435456/ 512))"
 
 	echo "dd bs=512 if=$bootfsImg of=${fwImg} seek=$BOOTOFFSET conv=notrunc"
