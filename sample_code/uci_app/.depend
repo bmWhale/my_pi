@@ -1,0 +1,2 @@
+cli.o: cli.c ../../../sdk/library/libuci/uci.h \
+  ../../../sdk/library/libuci/uci_config.h
