@@ -1,0 +1,3 @@
+[submodule "my_mini_pi/glibc"]
+	path = my_mini_pi/glibc
+	url = https://sourceware.org/git/glibc.git
