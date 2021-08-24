@@ -41,7 +41,7 @@ ifeq (,$(wildcard ./u-boot))
 	cd u-boot && git checkout tags/$(UBOOT_VER) -b $(UBOOT_VER)
 endif
 ifeq (,$(wildcard ./firmware))
-	svn export https://github.com/raspberrypi/firmware/trunk/boot firmware
+	git clone https://github.com/raspberrypi/firmware.git firmware
 endif
 ifeq (,$(wildcard ./glibc))
 	mkdir glibc

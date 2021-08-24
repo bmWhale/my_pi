@@ -4,3 +4,6 @@
 [submodule "my_mini_pi/busybox"]
 	path = my_mini_pi/busybox
 	url = git://git.busybox.net/busybox
+[submodule "my_mini_pi/linux"]
+	path = my_mini_pi/linux
+	url = https://github.com/raspberrypi/linux
