@@ -1,0 +1,11 @@
+#kernel=zImage
+kernel=u-boot.bin
+
+enable_uart=1
+#have a properly sized image
+disable_overscan=1
+
+# Uncomment this to disable the Bluetooth module on /dev/ttyAMA0
+dtoverlay=pi3-disable-bt
+
+gpu_mem=128

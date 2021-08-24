@@ -45,7 +45,10 @@ ifeq (,$(wildcard ./firmware))
 endif
 ifeq (,$(wildcard ./glibc))
 	mkdir glibc
-	wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
+	#wget http://ftp.gnu.org/gnu/libc/glibc-$(GLIBC_V).tar.xz -P glibc
+	git clone https://sourceware.org/git/glibc.git
+	cd glibc
+	git checkout release/2.34/master
 endif
 
 .PHONY:glibc
