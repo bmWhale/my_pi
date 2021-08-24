@@ -1,3 +1,6 @@
 [submodule "my_mini_pi/glibc"]
 	path = my_mini_pi/glibc
 	url = https://sourceware.org/git/glibc.git
+[submodule "my_mini_pi/busybox"]
+	path = my_mini_pi/busybox
+	url = git://git.busybox.net/busybox
