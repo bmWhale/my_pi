@@ -1,0 +1,6 @@
+bcm2835_sdhost.c:704:12:bcm2835_set_ios	24	static
+bcm2835_sdhost.c:752:12:bcm2835_probe	24	static
+bcm2835_sdhost.c:792:12:bcm2835_bind	8	static
+bcm2835_sdhost.c:391:12:bcm2835_read_wait_sdcmd.isra.0	16	static
+bcm2835_sdhost.c:461:12:bcm2835_finish_command	16	static
+bcm2835_sdhost.c:658:12:bcm2835_send_cmd	40	static

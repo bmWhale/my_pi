@@ -1,0 +1,9 @@
+usb_kbd.c:636:12:usb_kbd_remove	16	static
+usb_kbd.c:629:12:usb_kbd_probe	112	static
+usb_kbd.c:149:13:usb_kbd_put_sequence	4	static
+usb_kbd.c:174:12:usb_kbd_translate.part.0	16	static
+usb_kbd.c:294:12:usb_kbd_irq_worker	184	static
+usb_kbd.c:403:12:usb_kbd_getc	24	static
+usb_kbd.c:377:12:usb_kbd_testc	24	static
+usb_kbd.c:324:12:usb_kbd_irq	0	static
+usb_kbd.c:30:5:overwrite_console	0	static

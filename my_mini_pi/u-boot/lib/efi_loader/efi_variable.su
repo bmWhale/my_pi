@@ -1,0 +1,12 @@
+efi_variable.c:581:1:efi_get_variable_runtime	0	static
+efi_variable.c:597:1:efi_get_next_variable_name_runtime	0	static
+efi_variable.c:614:1:efi_set_variable_runtime	0	static
+efi_variable.c:67:21:efi_to_native	32	static
+efi_variable.c:94:20:prefix	16	static
+efi_variable.c:112:20:parse_attr.part.0	24	static
+efi_variable.c:166:21:efi_get_variable	48	static
+efi_variable.c:331:21:efi_get_next_variable_name	328	static
+efi_variable.c:422:21:efi_set_variable	40	static
+efi_variable.c:561:35:efi_query_variable_info	0	static
+efi_variable.c:624:6:efi_variables_boot_exit_notify	0	static
+efi_variable.c:638:14:efi_init_variables	0	static

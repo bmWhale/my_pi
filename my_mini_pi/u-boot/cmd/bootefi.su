@@ -1,0 +1,4 @@
+bootefi.c:211:21:efi_install_fdt	360	static
+bootefi.c:291:21:do_bootefi_exec	64	static
+bootefi.c:556:12:do_bootefi	40	static
+bootefi.c:626:6:efi_set_bootdev	48	static

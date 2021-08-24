@@ -1,0 +1,11 @@
+hash.c:131:12:hash_finish_crc32	8	static
+hash.c:105:12:hash_finish_crc16_ccitt	8	static
+hash.c:124:12:hash_update_crc32	8	static
+hash.c:116:12:hash_init_crc32	8	static
+hash.c:89:12:hash_init_crc16_ccitt	8	static
+hash.c:97:12:hash_update_crc16_ccitt	8	static
+hash.c:218:5:hash_lookup_algo	16	static
+hash.c:233:5:hash_progressive_lookup_algo	16	static
+hash.c:252:5:hash_parse_string	32	static
+hash.c:272:5:hash_block	32	static
+hash.c:416:5:hash_command	32	static
