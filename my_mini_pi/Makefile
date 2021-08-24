@@ -3,7 +3,7 @@ TOOLPATH := /tools
 ARCH := arm
 TARGET := arm-linux-gnueabihf
 GLIBC_V := 2.25
-BUSY_VER := 1_31_stable
+BUSY_VER := master
 KERNEL_VER := raspberrypi-kernel_1.20190925-1
 UBOOT_VER := v2019.10-rc4
 
@@ -34,7 +34,7 @@ ifeq (,$(wildcard ./busybox))
 endif
 ifeq (,$(wildcard ./linux))
 	git clone https://github.com/raspberrypi/linux
-	cd linux && git checkout tags/$(KERNEL_VER) -b $(KERNEL_VER)
+	#cd linux && git checkout tags/$(KERNEL_VER) -b $(KERNEL_VER)
 endif
 ifeq (,$(wildcard ./u-boot))
 	git clone git://git.denx.de/u-boot.git
@@ -50,9 +50,9 @@ endif
 
 .PHONY:glibc
 glibc:
-	cd glibc && tar -xJf glibc-$(GLIBC_V).tar.xz
+	#cd glibc && tar -xJf glibc-$(GLIBC_V).tar.xz
 	mkdir -p glibc/glibc-build
-	cd glibc/glibc-build && ../glibc-$(GLIBC_V)/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make	
+	cd glibc/glibc-build && ../glibc/configure $(TARGET) --target=$(TARGET) --build=$(MACHTYPE) --prefix= --enable-add-ons && make
 
 .PHONY: busybox
 busybox:
