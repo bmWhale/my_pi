@@ -7,3 +7,6 @@
 [submodule "my_mini_pi/linux"]
 	path = my_mini_pi/linux
 	url = https://github.com/raspberrypi/linux
+[submodule "my_mini_pi/firmware"]
+	path = my_mini_pi/firmware
+	url = https://github.com/raspberrypi/firmware.git
